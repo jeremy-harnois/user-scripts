@@ -1,13 +1,55 @@
 // ==UserScript==
-// @version         1.0.0
+// @version         1.1.0
 // @name            Proton Calendar (library)
 // @author          Jeremy Harnois
 // @supportURL      https://github.com/jeremy-harnois/user-scripts/issues
 // @namespace       https://github.com/jeremy-harnois/user-scripts
 // ==/UserScript==
 
-/* exported doNotDimPastEventsIn */
+/* exported advanceOnMouseWheel, doNotDimPastEventsIn */
 
+/* @since 1.1.0 */
+function advanceOnMouseWheel({
+  containerSelectors = [
+    '.calendar-row-heading', // day and week view
+    '.calendar-daygrid' // month view
+  ],
+  downAdvances = true
+} = {}) {
+  (new MutationObserver((records, observer) => {
+    records.forEach(record => {
+      if (record.target.matches('.app-root')) {
+        record.addedNodes.forEach(node => {
+          const header = node.querySelector('header');
+          const main = node.querySelector('main');
+
+          if (header && main) {
+            observer.disconnect();
+
+            const nextButton = header.querySelector('[data-testid="calendar-toolbar:next"]');
+            const prevButton = header.querySelector('[data-testid="calendar-toolbar:previous"]');
+
+            if (nextButton && prevButton) {
+              main.addEventListener('wheel', (event) => {
+                if (event.target.closest(containerSelectors.join(','))) {
+                  (!!downAdvances ? 1 : -1) === Math.sign(event.deltaY) ? nextButton.click() : prevButton.click();
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+  })).observe(
+    document.querySelector('.app-root'), {
+      subtree: false,
+      childList: true,
+      attributes: false
+    }
+  );
+}
+
+/* @since 1.0.0 */
 function doNotDimPastEventsIn(calendars = []) {
   const calendarSelectors = () => calendars.map(calendar => {
     try {
