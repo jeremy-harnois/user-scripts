@@ -1,3 +1,3 @@
 # User Scripts
 
-_User scripts (a.k.a. userscripts) library for Firemonkey and other userscript manager browser extensions_
+_Userscripts (a.k.a. user scripts) library for FireMonkey and other userscript managers_
