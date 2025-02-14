@@ -1,5 +1,5 @@
 // ==UserScript==
-// @version         1.1.0
+// @version         1.1.1
 // @name            Proton Calendar (library)
 // @author          Jeremy Harnois
 // @supportURL      https://github.com/jeremy-harnois/user-scripts/issues
@@ -26,16 +26,12 @@ function advanceOnMouseWheel({
           if (header && main) {
             observer.disconnect();
 
-            const nextButton = header.querySelector('[data-testid="calendar-toolbar:next"]');
-            const prevButton = header.querySelector('[data-testid="calendar-toolbar:previous"]');
-
-            if (nextButton && prevButton) {
-              main.addEventListener('wheel', (event) => {
-                if (event.target.closest(containerSelectors.join(','))) {
-                  (!!downAdvances ? 1 : -1) === Math.sign(event.deltaY) ? nextButton.click() : prevButton.click();
-                }
-              });
-            }
+            main.addEventListener('wheel', (event) => {
+              if (event.target.closest(containerSelectors.join(','))) {
+                const button = (!!downAdvances ? 1 : -1) === Math.sign(event.deltaY) ? 'next' : 'previous';
+                header.querySelector(`[data-testid="calendar-toolbar:${button}"]`).click();
+              }
+            });
           }
         });
       }
