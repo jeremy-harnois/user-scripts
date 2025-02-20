@@ -1,11 +1,12 @@
 // ==UserScript==
-// @version         1.1.1
+// @version         1.1.2
 // @name            Proton Calendar (library)
 // @author          Jeremy Harnois
 // @supportURL      https://github.com/jeremy-harnois/user-scripts/issues
 // @namespace       https://github.com/jeremy-harnois/user-scripts
 // ==/UserScript==
 
+/* global waitUntilAppLoads */
 /* exported advanceOnMouseWheel, doNotDimPastEventsIn */
 
 /* @since 1.1.0 */
@@ -16,33 +17,14 @@ function advanceOnMouseWheel({
   ],
   downAdvances = true
 } = {}) {
-  (new MutationObserver((records, observer) => {
-    records.forEach(record => {
-      if (record.target.matches('.app-root')) {
-        record.addedNodes.forEach(node => {
-          const header = node.querySelector('header');
-          const main = node.querySelector('main');
-
-          if (header && main) {
-            observer.disconnect();
-
-            main.addEventListener('wheel', (event) => {
-              if (event.target.closest(containerSelectors.join(','))) {
-                const button = (!!downAdvances ? 1 : -1) === Math.sign(event.deltaY) ? 'next' : 'previous';
-                header.querySelector(`[data-testid="calendar-toolbar:${button}"]`).click();
-              }
-            });
-          }
-        });
+	waitUntilAppLoads(['header', 'main']).then(([header, main]) => {
+    main.addEventListener('wheel', (event) => {
+      if (event.target.closest(containerSelectors.join(','))) {
+        const button = (!!downAdvances ? 1 : -1) === Math.sign(event.deltaY) ? 'next' : 'previous';
+        header.querySelector(`[data-testid="calendar-toolbar:${button}"]`).click();
       }
     });
-  })).observe(
-    document.querySelector('.app-root'), {
-      subtree: false,
-      childList: true,
-      attributes: false
-    }
-  );
+  });
 }
 
 /* @since 1.0.0 */
@@ -68,50 +50,31 @@ function doNotDimPastEventsIn(calendars = []) {
   }).filter(selector => !!selector).join(',');
 
   if (calendars.length) {
-    (new MutationObserver((records, observer) => {
-      records.forEach(record => {
-        if (record.target.matches('.app-root')) {
-          record.addedNodes.forEach(node => {
-            const nav = node.querySelector('nav');
-            const main = node.querySelector('main');
+    waitUntilAppLoads(['main']).then(([main]) => {
+      const selectors = calendarSelectors();
 
-            if (nav && main) {
-              observer.disconnect();
-
-              const selectors = calendarSelectors();
-
-              (new MutationObserver((records, ) => {
-                records.forEach(record => {
-                  switch (record.type) {
-                    case 'attributes':
-                      if (record.target.matches(selectors)) {
-                        record.target.classList.remove('isPast');
-                      }
-                      break;
-                    case 'childList':
-                      record.addedNodes.forEach(node => {
-                        node.querySelector(selectors)?.classList.remove('isPast');
-                      });
-                      break;
-                  }
-                });
-              })).observe(
-                main, {
-                  subtree: true,
-                  childList: true,
-                  attributes: true
-                }
-              );
-            }
-          });
+      (new MutationObserver((records, ) => {
+        records.forEach(record => {
+          switch (record.type) {
+            case 'attributes':
+              if (record.target.matches(selectors)) {
+                record.target.classList.remove('isPast');
+              }
+              break;
+            case 'childList':
+              record.addedNodes.forEach(node => {
+                node.querySelector(selectors)?.classList.remove('isPast');
+              });
+              break;
+          }
+        });
+      })).observe(
+        main, {
+          subtree: true,
+          childList: true,
+          attributes: true
         }
-      });
-    })).observe(
-      document.querySelector('.app-root'), {
-        subtree: false,
-        childList: true,
-        attributes: false
-      }
-    );
+      );
+    });
   }
 }
