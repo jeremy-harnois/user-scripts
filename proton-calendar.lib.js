@@ -1,5 +1,5 @@
 // ==UserScript==
-// @version         1.1.2
+// @version         1.2.0
 // @name            Proton Calendar (library)
 // @author          Jeremy Harnois
 // @supportURL      https://github.com/jeremy-harnois/user-scripts/issues
@@ -7,7 +7,26 @@
 // ==/UserScript==
 
 /* global waitUntilAppLoads */
-/* exported advanceOnMouseWheel, doNotDimPastEventsIn */
+/* exported advanceOnMouseWheel, doNotDimPastEventsIn, goToTodayOnMouseClick */
+
+/* @since 1.2.0 */
+function goToTodayOnMouseClick({
+  button = 1, // middle
+  containerSelectors = [
+    '.calendar-row-heading', // day and week view
+    '.calendar-daygrid' // month view
+  ]
+} = {}) {
+  waitUntilAppLoads(['header', 'main']).then(([header, main]) => {
+    main.addEventListener('mousedown', (event) => {
+      if (event.target.closest(containerSelectors.join(','))) {
+        if (event.button === button) {
+          header.querySelector('[data-testid="calendar-toolbar:today"]').click();
+        }
+      }
+    });
+  });
+}
 
 /* @since 1.1.0 */
 function advanceOnMouseWheel({

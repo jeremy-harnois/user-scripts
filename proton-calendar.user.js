@@ -1,5 +1,5 @@
 // ==UserScript==
-// @version         1.1.1
+// @version         1.2.0
 // @name            Proton Calendar
 // @author          Jeremy Harnois
 // @match           https://calendar.proton.me/u/*
@@ -9,7 +9,8 @@
 // @namespace       https://github.com/jeremy-harnois/user-scripts
 // ==/UserScript==
 
-/* global advanceOnMouseWheel, doNotDimPastEventsIn, waitUntilAppLoads */
+/* global advanceOnMouseWheel, doNotDimPastEventsIn, goToTodayOnMouseClick, waitUntilAppLoads */
 
 //advanceOnMouseWheel();
 //doNotDimPastEventsIn(/*['Calendar']*/);
+//goToTodayOnMouseClick();
